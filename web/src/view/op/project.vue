@@ -2,6 +2,12 @@
   <div>
     <div class="gva-search-box">
       <el-form :inline="true" :model="searchInfo" class="demo-form-inline">
+        <el-form-item label="类型">
+          <el-input v-model="searchInfo.type" placeholder="搜索条件" />
+        </el-form-item>
+        <el-form-item label="状态1正常2关闭">
+          <el-input v-model="searchInfo.status" placeholder="搜索条件" />
+        </el-form-item>
         <el-form-item>
           <el-button size="small" type="primary" icon="search" @click="onSubmit">查询</el-button>
           <el-button size="small" icon="refresh" @click="onReset">重置</el-button>
@@ -34,17 +40,21 @@
         <el-table-column align="left" label="日期" width="180">
             <template #default="scope">{{ formatDate(scope.row.CreatedAt) }}</template>
         </el-table-column>
-        <el-table-column align="left" label="baseAuth 认证KEY" prop="access" width="120" />
-        <el-table-column align="left" label="描述信息" prop="desc" width="120" />
-        <el-table-column align="left" label="git仓地址" prop="git" width="120" />
         <el-table-column align="left" label="名称" prop="name" width="120" />
+        <el-table-column align="left" label="类型" prop="type" width="120">
+            <template #default="scope">
+            {{ filterDict(scope.row.type,PROJECT_TYPEOptions) }}
+            </template>
+        </el-table-column>
+        <el-table-column align="left" label="baseAuth 认证KEY" prop="access" width="120" />
         <el-table-column align="left" label="密钥" prop="secretKey" width="120" />
         <el-table-column align="left" label="状态1正常2关闭" prop="status" width="120">
-            <template #default="scope">{{ formatBoolean(scope.row.status) }}</template>
+            <template #default="scope">
+            {{ filterDict(scope.row.status,PROJECT_STATUSOptions) }}
+            </template>
         </el-table-column>
-        <el-table-column align="left" label="类型,1service 2frontend 3backend 4app" prop="type" width="120">
-            <template #default="scope">{{ formatBoolean(scope.row.type) }}</template>
-        </el-table-column>
+        <el-table-column align="left" label="描述信息" prop="desc" width="120" />
+        <el-table-column align="left" label="git仓地址" prop="git" width="120" />
         <el-table-column align="left" label="按钮组">
             <template #default="scope">
             <el-button type="text" icon="edit" size="small" class="table-button" @click="updateProjectFunc(scope.row)">变更</el-button>
@@ -66,26 +76,30 @@
     </div>
     <el-dialog v-model="dialogFormVisible" :before-close="closeDialog" title="弹窗操作">
       <el-form :model="formData" label-position="right" label-width="80px">
+        <el-form-item label="名称:">
+          <el-input v-model="formData.name" clearable placeholder="请输入" />
+        </el-form-item>
+        <el-form-item label="类型:">
+          <el-select v-model="formData.type" placeholder="请选择" style="width:100%" clearable>
+            <el-option v-for="(item,key) in PROJECT_TYPEOptions" :key="key" :label="item.label" :value="item.value" />
+          </el-select>
+        </el-form-item>
         <el-form-item label="baseAuth 认证KEY:">
           <el-input v-model="formData.access" clearable placeholder="请输入" />
+        </el-form-item>
+        <el-form-item label="密钥:">
+          <el-input v-model="formData.secretKey" clearable placeholder="请输入" />
+        </el-form-item>
+        <el-form-item label="状态1正常2关闭:">
+          <el-select v-model="formData.status" placeholder="请选择" style="width:100%" clearable>
+            <el-option v-for="(item,key) in PROJECT_STATUSOptions" :key="key" :label="item.label" :value="item.value" />
+          </el-select>
         </el-form-item>
         <el-form-item label="描述信息:">
           <el-input v-model="formData.desc" clearable placeholder="请输入" />
         </el-form-item>
         <el-form-item label="git仓地址:">
           <el-input v-model="formData.git" clearable placeholder="请输入" />
-        </el-form-item>
-        <el-form-item label="名称:">
-          <el-input v-model="formData.name" clearable placeholder="请输入" />
-        </el-form-item>
-        <el-form-item label="密钥:">
-          <el-input v-model="formData.secretKey" clearable placeholder="请输入" />
-        </el-form-item>
-        <el-form-item label="状态1正常2关闭:">
-          <el-switch v-model="formData.status" active-color="#13ce66" inactive-color="#ff4949" active-text="是" inactive-text="否" clearable ></el-switch>
-        </el-form-item>
-        <el-form-item label="类型,1service 2frontend 3backend 4app:">
-          <el-switch v-model="formData.type" active-color="#13ce66" inactive-color="#ff4949" active-text="是" inactive-text="否" clearable ></el-switch>
         </el-form-item>
       </el-form>
       <template #footer>
@@ -120,14 +134,16 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import { ref } from 'vue'
 
 // 自动化生成的字典（可能为空）以及字段
+const PROJECT_TYPEOptions = ref([])
+const PROJECT_STATUSOptions = ref([])
 const formData = ref({
+        name: '',
+        type: undefined,
         access: '',
+        secretKey: '',
+        status: undefined,
         desc: '',
         git: '',
-        name: '',
-        secretKey: '',
-        status: false,
-        type: false,
         })
 
 // =========== 表格控制部分 ===========
@@ -146,12 +162,6 @@ const onReset = () => {
 const onSubmit = () => {
   page.value = 1
   pageSize.value = 10
-  if (searchInfo.value.status === ""){
-      searchInfo.value.status=null
-  }
-  if (searchInfo.value.type === ""){
-      searchInfo.value.type=null
-  }
   getTableData()
 }
 
@@ -184,6 +194,8 @@ getTableData()
 
 // 获取需要的字典 可能为空 按需保留
 const setOptions = async () =>{
+    PROJECT_TYPEOptions.value = await getDictFunc('PROJECT_TYPE')
+    PROJECT_STATUSOptions.value = await getDictFunc('PROJECT_STATUS')
 }
 
 // 获取需要的字典 可能为空 按需保留
@@ -282,13 +294,13 @@ const openDialog = () => {
 const closeDialog = () => {
     dialogFormVisible.value = false
     formData.value = {
+        name: '',
+        type: undefined,
         access: '',
+        secretKey: '',
+        status: undefined,
         desc: '',
         git: '',
-        name: '',
-        secretKey: '',
-        status: false,
-        type: false,
         }
 }
 // 弹窗确定

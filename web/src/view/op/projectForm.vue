@@ -2,26 +2,30 @@
   <div>
     <div class="gva-form-box">
       <el-form :model="formData" label-position="right" label-width="80px">
+        <el-form-item label="名称:">
+          <el-input v-model="formData.name" clearable placeholder="请输入" />
+        </el-form-item>
+        <el-form-item label="类型:">
+          <el-select v-model="formData.type" placeholder="请选择" clearable>
+            <el-option v-for="(item,key) in PROJECT_TYPEOptions" :key="key" :label="item.label" :value="item.value" />
+          </el-select>
+        </el-form-item>
         <el-form-item label="baseAuth 认证KEY:">
           <el-input v-model="formData.access" clearable placeholder="请输入" />
+        </el-form-item>
+        <el-form-item label="密钥:">
+          <el-input v-model="formData.secretKey" clearable placeholder="请输入" />
+        </el-form-item>
+        <el-form-item label="状态1正常2关闭:">
+          <el-select v-model="formData.status" placeholder="请选择" clearable>
+            <el-option v-for="(item,key) in PROJECT_STATUSOptions" :key="key" :label="item.label" :value="item.value" />
+          </el-select>
         </el-form-item>
         <el-form-item label="描述信息:">
           <el-input v-model="formData.desc" clearable placeholder="请输入" />
         </el-form-item>
         <el-form-item label="git仓地址:">
           <el-input v-model="formData.git" clearable placeholder="请输入" />
-        </el-form-item>
-        <el-form-item label="名称:">
-          <el-input v-model="formData.name" clearable placeholder="请输入" />
-        </el-form-item>
-        <el-form-item label="密钥:">
-          <el-input v-model="formData.secretKey" clearable placeholder="请输入" />
-        </el-form-item>
-        <el-form-item label="状态1正常2关闭:">
-          <el-switch v-model="formData.status" active-color="#13ce66" inactive-color="#ff4949" active-text="是" inactive-text="否" clearable ></el-switch>
-        </el-form-item>
-        <el-form-item label="类型,1service 2frontend 3backend 4app:">
-          <el-switch v-model="formData.type" active-color="#13ce66" inactive-color="#ff4949" active-text="是" inactive-text="否" clearable ></el-switch>
         </el-form-item>
         <el-form-item>
           <el-button size="mini" type="primary" @click="save">保存</el-button>
@@ -53,14 +57,16 @@ import { ref } from 'vue'
 const route = useRoute()
 const router = useRouter()
 const type = ref('')
+const PROJECT_TYPEOptions = ref([])
+const PROJECT_STATUSOptions = ref([])
 const formData = ref({
+        name: '',
+        type: undefined,
         access: '',
+        secretKey: '',
+        status: undefined,
         desc: '',
         git: '',
-        name: '',
-        secretKey: '',
-        status: false,
-        type: false,
         })
 
 // 初始化方法
@@ -75,6 +81,8 @@ const init = async () => {
     } else {
       type.value = 'create'
     }
+    PROJECT_TYPEOptions.value = await getDictFunc('PROJECT_TYPE')
+    PROJECT_STATUSOptions.value = await getDictFunc('PROJECT_STATUS')
 }
 
 init()

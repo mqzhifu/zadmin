@@ -12,7 +12,6 @@ type ProjectService struct {
 // CreateProject 创建Project记录
 // Author [piexlmax](https://github.com/piexlmax)
 func (projectService *ProjectService) CreateProject(project op.Project) (err error) {
-	myBusinessDb.GetDbInc()
 	err = myBusinessDb.GetDbInc().Create(&project).Error
 	return err
 }
@@ -54,6 +53,12 @@ func (projectService *ProjectService) GetProjectInfoList(info opReq.ProjectSearc
 	db := myBusinessDb.GetDbInc().Model(&op.Project{})
 	var projects []op.Project
 	// 如果有条件搜索 下方会自动创建搜索语句
+	if info.Type != nil {
+		db = db.Where("type = ?", info.Type)
+	}
+	if info.Status != nil {
+		db = db.Where("status = ?", info.Status)
+	}
 	err = db.Count(&total).Error
 	if err != nil {
 		return
