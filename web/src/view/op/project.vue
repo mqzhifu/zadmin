@@ -85,8 +85,9 @@
         </div>
     </div>
     <el-dialog v-model="dialogFormVisible" :before-close="closeDialog" title="弹窗操作">
-      <el-form :model="formData" label-position="right" label-width="80px">
+      <el-form :rules="rules" :model="formData" label-position="right" label-width="80px">
 
+<!--        ref="formData"-->
 
         <el-form-item label="ID:" v-if="isEdit">
           <el-input v-model="formData.ID" :disabled="isEdit" />
@@ -115,7 +116,7 @@
         <el-form-item label="描述信息:">
           <el-input v-model="formData.desc" clearable placeholder="请输入" />
         </el-form-item>
-        <el-form-item label="git仓地址:">
+        <el-form-item label="git仓地址:" prop="git">
           <el-input v-model="formData.git" clearable placeholder="请输入" />
         </el-form-item>
       </el-form>
@@ -162,6 +163,37 @@ const formData = ref({
         desc: '',
         git: '',
         })
+
+const rules = ref({
+  // name: [
+  //   { required: true, message: '请输入名称', trigger: 'blur' }
+  // ],
+  // type: [
+  //   { required: true, message: '请输入类型', trigger: 'blur' }
+  // ],
+  // status: [
+  //   { required: true, message: '请输入状态', trigger: 'blur' }
+  // ],
+  git: [
+    { required: true, message: '请输入git checkout 地址', trigger: 'blur' }
+  ]
+  // abbreviation: [
+  //   { required: true, message: '请输入结构体简称', trigger: 'blur' }
+  // ],
+  // description: [
+  //   { required: true, message: '请输入结构体描述', trigger: 'blur' }
+  // ],
+  // packageName: [
+  //   {
+  //     required: true,
+  //     message: '文件名称：sysXxxxXxxx',
+  //     trigger: 'blur'
+  //   }
+  // ],
+  // package: [
+  //   { required: true, message: '请选择package', trigger: 'blur' }
+  // ]
+})
 
 // =========== 表格控制部分 ===========
 const page = ref(1)
@@ -326,6 +358,8 @@ const closeDialog = () => {
 }
 // 弹窗确定
 const enterDialog = async () => {
+  // formData.value.validate(async valid => {
+  //   if (valid) {
       let res
       switch (type.value) {
         case 'create':
@@ -346,6 +380,8 @@ const enterDialog = async () => {
         closeDialog()
         getTableData()
       }
+    // }
+  // })
 }
 </script>
 
