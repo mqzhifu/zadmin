@@ -3,8 +3,15 @@
     <div class="gva-search-box">
       <el-form :inline="true" :model="searchInfo" class="demo-form-inline">
         <el-form-item label="类型">
-          <el-input v-model="searchInfo.type" placeholder="搜索条件" />
+          <el-select v-model="searchInfo.type" placeholder="请选择" style="width:100%" clearable>
+            <el-option v-for="(item,key) in PROJECT_TYPEOptions" :key="key" :label="item.label" :value="item.value" />
+          </el-select>
         </el-form-item>
+
+
+
+
+
         <el-form-item label="状态1正常2关闭">
           <el-input v-model="searchInfo.status" placeholder="搜索条件" />
         </el-form-item>
@@ -37,9 +44,8 @@
         @selection-change="handleSelectionChange"
         >
         <el-table-column type="selection" width="55" />
-        <el-table-column align="left" label="日期" width="180">
-            <template #default="scope">{{ formatDate(scope.row.CreatedAt) }}</template>
-        </el-table-column>
+
+          <el-table-column align="left" label="ID" prop="ID" width="" />
         <el-table-column align="left" label="名称" prop="name" width="120" />
         <el-table-column align="left" label="类型" prop="type" width="120">
             <template #default="scope">
@@ -55,6 +61,10 @@
         </el-table-column>
         <el-table-column align="left" label="描述信息" prop="desc" width="120" />
         <el-table-column align="left" label="git仓地址" prop="git" width="120" />
+          <el-table-column align="left" label="日期" width="180">
+            <template #default="scope">{{ formatUnixtDate(scope.row.CreatedAt) }}</template>
+          </el-table-column>
+
         <el-table-column align="left" label="按钮组">
             <template #default="scope">
             <el-button type="text" icon="edit" size="small" class="table-button" @click="updateProjectFunc(scope.row)">变更</el-button>
@@ -76,6 +86,13 @@
     </div>
     <el-dialog v-model="dialogFormVisible" :before-close="closeDialog" title="弹窗操作">
       <el-form :model="formData" label-position="right" label-width="80px">
+
+
+        <el-form-item label="ID:" v-if="isEdit">
+          <el-input v-model="formData.ID" :disabled="isEdit" />
+        </el-form-item>
+
+
         <el-form-item label="名称:">
           <el-input v-model="formData.name" clearable placeholder="请输入" />
         </el-form-item>
@@ -129,7 +146,7 @@ import {
 } from '@/api/project'
 
 // 全量引入格式化工具 请按需保留
-import { getDictFunc, formatDate, formatBoolean, filterDict } from '@/utils/format'
+import { getDictFunc, formatDate,formatUnixtDate, formatBoolean, filterDict } from '@/utils/format'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { ref } from 'vue'
 
@@ -152,6 +169,7 @@ const total = ref(0)
 const pageSize = ref(10)
 const tableData = ref([])
 const searchInfo = ref({})
+const isEdit = ref(false)
 
 // 重置
 const onReset = () => {
@@ -257,9 +275,11 @@ const type = ref('')
 
 // 更新行
 const updateProjectFunc = async(row) => {
+
     const res = await findProject({ ID: row.ID })
     type.value = 'update'
     if (res.code === 0) {
+      isEdit.value = true
         formData.value = res.data.reproject
         dialogFormVisible.value = true
     }
@@ -292,6 +312,7 @@ const openDialog = () => {
 
 // 关闭弹窗
 const closeDialog = () => {
+    isEdit.value = false
     dialogFormVisible.value = false
     formData.value = {
         name: '',
