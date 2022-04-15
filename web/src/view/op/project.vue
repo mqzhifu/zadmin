@@ -45,23 +45,23 @@
         >
         <el-table-column type="selection" width="55" />
 
-          <el-table-column align="left" label="ID" prop="ID" width="" />
-        <el-table-column align="left" label="名称" prop="name" width="120" />
-        <el-table-column align="left" label="类型" prop="type" width="120">
+          <el-table-column align="left" label="ID" prop="ID" width="40" />
+        <el-table-column align="left" label="名称" prop="name" width="" />
+        <el-table-column align="left" label="类型" prop="type" width="">
             <template #default="scope">
             {{ filterDict(scope.row.type,PROJECT_TYPEOptions) }}
             </template>
         </el-table-column>
-        <el-table-column align="left" label="baseAuth 认证KEY" prop="access" width="120" />
-        <el-table-column align="left" label="密钥" prop="secretKey" width="120" />
-        <el-table-column align="left" label="状态1正常2关闭" prop="status" width="120">
+        <el-table-column align="left" label="baseAuth 认证KEY" prop="access" width="" />
+        <el-table-column align="left" label="密钥" prop="secretKey" width="" />
+        <el-table-column align="left" label="状态1正常2关闭" prop="status" width="">
             <template #default="scope">
             {{ filterDict(scope.row.status,PROJECT_STATUSOptions) }}
             </template>
         </el-table-column>
-        <el-table-column align="left" label="描述信息" prop="desc" width="120" />
-        <el-table-column align="left" label="git仓地址" prop="git" width="120" />
-          <el-table-column align="left" label="日期" width="180">
+        <el-table-column align="left" label="描述信息" prop="desc" width="" />
+        <el-table-column align="left" label="git仓地址" prop="git" width="" />
+          <el-table-column align="left" label="日期" width="">
             <template #default="scope">{{ formatUnixtDate(scope.row.CreatedAt) }}</template>
           </el-table-column>
 
@@ -85,35 +85,33 @@
         </div>
     </div>
     <el-dialog v-model="dialogFormVisible" :before-close="closeDialog" title="弹窗操作">
-      <el-form :rules="rules" :model="formData" label-position="right" label-width="80px">
-
-<!--        ref="formData"-->
+      <el-form ref="projectFormVV" :rules="rules" :model="formData" label-position="right" label-width="80px">
 
         <el-form-item label="ID:" v-if="isEdit">
           <el-input v-model="formData.ID" :disabled="isEdit" />
         </el-form-item>
 
 
-        <el-form-item label="名称:">
-          <el-input v-model="formData.name" clearable placeholder="请输入" />
+        <el-form-item label="名称:" prop="name">
+          <el-input v-model="formData.name" :disabled="isEdit" />
         </el-form-item>
-        <el-form-item label="类型:">
+        <el-form-item label="类型:" prop="type">
           <el-select v-model="formData.type" placeholder="请选择" style="width:100%" clearable>
             <el-option v-for="(item,key) in PROJECT_TYPEOptions" :key="key" :label="item.label" :value="item.value" />
           </el-select>
         </el-form-item>
-        <el-form-item label="baseAuth 认证KEY:">
+        <el-form-item label="baseAuth 认证KEY:" prop="access">
           <el-input v-model="formData.access" clearable placeholder="请输入" />
         </el-form-item>
         <el-form-item label="密钥:">
           <el-input v-model="formData.secretKey" clearable placeholder="请输入" />
         </el-form-item>
-        <el-form-item label="状态1正常2关闭:">
+        <el-form-item label="状态1正常2关闭:" prop="status">
           <el-select v-model="formData.status" placeholder="请选择" style="width:100%" clearable>
             <el-option v-for="(item,key) in PROJECT_STATUSOptions" :key="key" :label="item.label" :value="item.value" />
           </el-select>
         </el-form-item>
-        <el-form-item label="描述信息:">
+        <el-form-item label="描述信息:"  prop="desc">
           <el-input v-model="formData.desc" clearable placeholder="请输入" />
         </el-form-item>
         <el-form-item label="git仓地址:" prop="git">
@@ -154,6 +152,35 @@ import { ref } from 'vue'
 // 自动化生成的字典（可能为空）以及字段
 const PROJECT_TYPEOptions = ref([])
 const PROJECT_STATUSOptions = ref([])
+
+const projectFormVV = ref (null)
+const rules = ref({
+  name: [
+    { required: true, message: '请输入 名称', trigger: 'blur' },
+    // {pattern: /^[0-9]*$/, message: `请输入数字`, trigger: 'blur'}
+    {pattern: /^[A-Z]{1}[A-Za-z]+$/, message: `只能是字母，且首字母大写`, trigger: 'blur'}
+  ],
+  type: [
+    { required: true, message: '不允许为空', trigger: 'blur' }
+  ],
+  status: [
+    { required: true, message: '不允许为空', trigger: 'blur' }
+  ],
+  access: [
+    { required: true, message: '请输入 access', trigger: 'blur' }
+  ],
+
+  desc: [
+    { required: true, message: '请输入 描述信息', trigger: 'blur' }
+  ],
+  git: [
+    { required: true, message: '请输入git clone 地址,用于cicd', trigger: 'blur' }
+  ]
+
+})
+
+
+
 const formData = ref({
         name: '',
         type: undefined,
@@ -162,38 +189,12 @@ const formData = ref({
         status: undefined,
         desc: '',
         git: '',
-        })
-
-const rules = ref({
-  // name: [
-  //   { required: true, message: '请输入名称', trigger: 'blur' }
-  // ],
-  // type: [
-  //   { required: true, message: '请输入类型', trigger: 'blur' }
-  // ],
-  // status: [
-  //   { required: true, message: '请输入状态', trigger: 'blur' }
-  // ],
-  git: [
-    { required: true, message: '请输入git checkout 地址', trigger: 'blur' }
-  ]
-  // abbreviation: [
-  //   { required: true, message: '请输入结构体简称', trigger: 'blur' }
-  // ],
-  // description: [
-  //   { required: true, message: '请输入结构体描述', trigger: 'blur' }
-  // ],
-  // packageName: [
-  //   {
-  //     required: true,
-  //     message: '文件名称：sysXxxxXxxx',
-  //     trigger: 'blur'
-  //   }
-  // ],
-  // package: [
-  //   { required: true, message: '请选择package', trigger: 'blur' }
-  // ]
 })
+
+
+
+
+
 
 // =========== 表格控制部分 ===========
 const page = ref(1)
@@ -344,6 +345,7 @@ const openDialog = () => {
 
 // 关闭弹窗
 const closeDialog = () => {
+  projectFormVV.value.resetFields()
     isEdit.value = false
     dialogFormVisible.value = false
     formData.value = {
@@ -358,8 +360,10 @@ const closeDialog = () => {
 }
 // 弹窗确定
 const enterDialog = async () => {
-  // formData.value.validate(async valid => {
-  //   if (valid) {
+  // projectFormVV
+  console.log("enterDialog:",formData.value)
+  projectFormVV.value.validate(async valid => {
+    if (valid) {
       let res
       switch (type.value) {
         case 'create':
@@ -380,8 +384,8 @@ const enterDialog = async () => {
         closeDialog()
         getTableData()
       }
-    // }
-  // })
+    }
+  })
 }
 </script>
 
