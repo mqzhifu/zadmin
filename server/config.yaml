@@ -98,6 +98,17 @@ mysql:
   max-open-conns: 100
   log-mode: error
   log-zap: false
+mysql-business:
+  path: 8.142.177.235
+  port: "3306"
+  config: charset=utf8mb4&parseTime=True&loc=Local
+  db-name: test
+  username: root
+  password: mqzhifu
+  max-idle-conns: 10
+  max-open-conns: 100
+  log-mode: error
+  log-zap: false
 pgsql:
   path: ""
   port: ""
